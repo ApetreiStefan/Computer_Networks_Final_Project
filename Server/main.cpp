@@ -1,45 +1,33 @@
-#include <iostream>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <string.h>
+
+
+#include "./../Common_Code/Libraries.hpp"
+
 
 #define PORT 8080
 #define SERVER_IP "127.0.0.1"
 #define BUFFER_SIZE 1024
 
 int main() {
-    int sock = 0;
-    struct sockaddr_in serv_addr;
+    int server_fd = 0, client_fd = 0;
+    struct sockaddr_in server_adress;
     char buffer[BUFFER_SIZE] = {0};
     
-    // 1. Creare socket
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        std::cerr << "Socket creation error" << std::endl;
-        return -1;
-    }
+    server_fd = socket(AF_INET, SOCK_STREAM, 0); //socket de TCP
 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
+    server_adress.sin_family = AF_INET; // protocop ip v4
+    server_adress.sin_port = htons(PORT); // aici putem portul
     
-    // Convertire adresa IP din text in binar
-    if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) {
-        std::cerr << "Invalid address/ Address not supported" << std::endl;
-        return -1;
-    }
+    inet_pton(AF_INET, SERVER_IP, &server_adress.sin_addr); // aici adaugam adresa ai pi
     
-    // 2. Conectare la server
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        std::cerr << "Connection Failed" << std::endl;
-        return -1;
-    }
+    bind(server_fd,(struct sockaddr*)&server_adress, sizeof(server_adress)); // aici dam bind la adresa si port la socket
     
-    std::cout << "Connected to server. Start typing messages. (Type 'exit' to quit)\n";
+    listen(server_fd, 1);
+
+    
 
     std::string message;
     while (true) {
-        // Citeste mesajul de la utilizator
+  
         std::cout << "-> ";
         std::getline(std::cin, message);
 
@@ -47,11 +35,9 @@ int main() {
             break;
         }
 
-        // 3. Trimite mesajul la server
-        send(sock, message.c_str(), message.length(), 0);
+        send(server_fd, message.c_str(), message.length(), 0);
         
-        // 4. Asteapta si primeste raspunsul de la server
-        int valread = read(sock, buffer, BUFFER_SIZE);
+        int valread = read(server_fd, buffer, BUFFER_SIZE);
         if (valread > 0) {
             buffer[valread] = '\0';
             std::cout << "Server reply: " << buffer << std::endl;
@@ -63,8 +49,7 @@ int main() {
             break;
         }
     }
-
-    // Inchide socket-ul
-    close(sock);
+ 
+    close(server_fd);
     return 0;
 }
