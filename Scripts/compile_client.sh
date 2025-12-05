@@ -1,3 +1,3 @@
 
 
-g++ -Wall ./Client/main.cpp -o ./Binaries/client.bin
+g++ -Wall ./../Client/main.cpp ./../Client/Client.cpp -o ./../Binaries/client.bin

@@ -7,3 +7,7 @@ void Log::log(std::string message){
 void Log::log(std::string message, std::string tip_mesaj){
     std::cerr << '[' << name << '|' << tip_mesaj << "]: " << message << std::endl; 
 }
+
+Log::Log(const char* n){
+    name = n;
+}

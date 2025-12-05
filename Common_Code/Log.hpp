@@ -6,7 +6,7 @@ private:
     std::string name;
 
 public:
-    Log(std::string name) : name(name) {}
+    Log(const char*);
     void log(std::string message, std::string tip_mesaj);
     void log(std::string message);
 
