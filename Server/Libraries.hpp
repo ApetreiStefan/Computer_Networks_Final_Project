@@ -8,3 +8,5 @@
 #include <string.h>
 #include <thread>
 #include <string>
+#include <map>
+#include <sqlite3.h>

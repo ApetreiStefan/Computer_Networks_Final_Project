@@ -2,6 +2,8 @@
 #include "Client.hpp"
 
 Client::Client(){
+    this->initializeMap();
+
     client_socket = socket(AF_INET, SOCK_STREAM, 0);
 
     serv_addr.sin_family = AF_INET;
@@ -28,18 +30,68 @@ Client* Client::GetInstance(){
 
 
 
+int Client::getCommand(){
+    std::cout << "-> " << std::flush;
+    std::getline(std::cin, message);
+
+    return 0;
+}
+
+
+
+
+
+void Client::initializeMap(){
+    commands["login"] = 1;
+    commands["logout"] = 2;
+    commands["view"] = 3;
+    commands["exit"] = 4;
+    commands["kill"] = 5;
+    commands["register"] = 6;
+}
+
+
+
+
+int Client::checkCommand(){
+    for(auto i : commands){
+        if(i.first == message){
+            return i.second;
+        }
+    }
+    return -1;
+}
+
+
+
+
+int Client::sendCommand(int id){
+    if(send(client_socket, &id, sizeof(id), 0) == 0){
+        std::cout << "Ceva s-a intamplat cu serverul... OVER!" << std::endl;
+    }
+
+    return 0;
+}
+
+
+
+
+
 int Client::run(){
+    int temp;
     while (true) {
 
-        std::cout << "-> " << std::flush;
-        std::getline(std::cin, message);
-        std::flush(std::cout); // da, sunt 2 flushuri aici, dar nu repar ce nu e stricat
-
-        if (message == "exit") {
-            break;
+        getCommand();
+        temp = checkCommand();
+        if(temp < 0){
+            std::cout << "Comanda invalida!" << std::endl;
         }
-
-        send(client_socket, message.c_str(), message.length(), 0);
+        else if(temp == 4){
+            std::cout << "Ai fost deconectat cu succes!" << std::endl;
+            close(client_socket);
+            exit(0);
+        }
+        else sendCommand(temp);
     }
 
     close(client_socket);

@@ -1,4 +1,4 @@
-#include "./../Common_Code/Libraries.hpp"
+#include "Libraries.hpp"
 
 #define PORT 8080
 #define SERVER_IP "127.0.0.1"
@@ -11,13 +11,19 @@ private:
     char buffer[BUFFER_SIZE] = {0};
 
     std::string message;
-    
+    std::map<std::string,int> commands;
+
+    int getCommand();
+    int checkCommand();
+    int sendCommand(int id);
+
     Client();
 public:
     Client(Client&&) = delete;
     Client(const Client&) = delete;
 
     static Client* GetInstance();
+    void initializeMap();
 
     int run();
 };

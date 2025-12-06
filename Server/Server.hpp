@@ -1,6 +1,7 @@
 #pragma once
 
-#include "./../Common_Code/Libraries.hpp"
+#include "Libraries.hpp"
+#include "DatabaseManager.hpp"
 
 
 #define PORT 8080
@@ -18,7 +19,17 @@ private:
     fd_set read_set;
     int max_fd = 0;
 
+    DatabaseManager usersDB = DatabaseManager("./Databases/users.db");
+    std::string username;
+    std::string password;
+    int callback_users(void* data, int argc, char** argv, char** colName);
+    std::map<int, ClientInfo*> client_states;
+
     char buffer[BUFFER_SIZE];
+
+    int temp;
+    std::string message;
+    int processCommand(int fd);
 
     Server();
 

@@ -1,7 +1,6 @@
 #include "Server.hpp"
 
 
-
 Server::Server(){
 
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -41,7 +40,64 @@ Server* Server::GetInstance(){
 
 
 Server::~Server(){
+    for(auto i : GetInstance()->client_states){
+        delete i.second;
+    }
     delete GetInstance();
+}
+
+
+
+
+int Server::processCommand(int fd){
+
+    if(client_states[fd]->state == STATE_IDLE){
+
+        read(fd, &temp, sizeof(temp));
+        
+        switch(temp){
+            case 1:
+                std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea login!" << std::endl;
+                client_states[fd]->state = STATE_AWAITING_CREDENTIALS;
+                break;
+            case 2:
+                std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea logout!" << std::endl;
+                break;
+            case 3:
+                std::cout << "[Server]: Clientul " << fd-3 << " vrea sa vada cele mai noi carti!" << std::endl;
+                break;
+            case 4:
+                std::cout << "[Server]: Clientul " << fd-3 << " a dat exit!" << std::endl;
+                FD_CLR(fd, &master_set);
+                temp = 0;
+                break;
+            case 5:
+                std::cout << "[Server]: Clientul " << fd-3 << " m-a omorat!" << std::endl;
+                exit(0);
+                break;
+        }
+    }
+
+    else if(client_states[fd]->state == STATE_AWAITING_CREDENTIALS){
+        static char* p = NULL;
+        static int bytesread = read(fd, &buffer, BUFFER_SIZE);
+        buffer[bytesread] = '\0'; 
+        p = strtok(buffer, " ");
+        username = p;
+        p = strtok(NULL, " ");
+        password = p;
+
+        if(usersDB.checkLogin(username, password) == true){
+
+        }
+        else{
+            
+        }
+
+
+
+    }  
+    return 0;
 }
 
 
@@ -64,27 +120,13 @@ int Server::run(){
                 max_fd = new_client_fd;
             }
             std::cout << "New connection" << std::endl;
+            client_states[new_client_fd] = new ClientInfo();
 
             FD_SET(new_client_fd, &master_set);
         }
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (FD_ISSET(i, &read_set)) {
-                memset(buffer,0, BUFFER_SIZE);
-                
-                int nr_read = read(i, buffer, BUFFER_SIZE);
-                if (nr_read > 0) {
-                    buffer[nr_read] = '\0';
-                    std::cout << "[SERVER]: Client said: " << buffer << std::endl;
-                } else if (nr_read == 0) {
-                    std::cout << "[SERVER]: Client died or smth." << std::endl;
-                    FD_CLR(i, &master_set);
-                    break;
-                }
-
-                if(strcmp(buffer,"kill")==0){
-                    std::cout << "[SERVER]: Ma inchid acum, bye bye!" << std::endl;
-                    exit(0);
-                }
+                processCommand(i);
             }
         }
     }
