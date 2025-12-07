@@ -13,10 +13,6 @@ Server::Server(){
     bind(server_fd,(struct sockaddr*)&server_address, sizeof(server_address)); 
 
     listen(server_fd, 1);
-
-    FD_ZERO(&master_set);
-    FD_SET(server_fd, &master_set);
-    max_fd=server_fd;
     
     std::cout << "Listening on port: " << PORT << std::endl;
 }
@@ -39,64 +35,70 @@ Server* Server::GetInstance(){
 
 
 
-Server::~Server(){
-    for(auto i : GetInstance()->client_states){
-        delete i.second;
+std::vector<std::string> parseCommand(const std::string& input){
+    std::vector<std::string> words;
+    std::stringstream ss(input);
+    std::string word;
+
+    while (ss >> word) {
+        words.push_back(word);
     }
-    delete GetInstance();
+    return words;
+}
+
+
+
+
+
+int Server::checkCommand(){
+
+    for(auto i : commands){
+        if(i.first == words[1]){
+            return i.second;
+        }
+    }
+    return -1;
 }
 
 
 
 
 int Server::processCommand(int fd){
-
-    if(client_states[fd]->state == STATE_IDLE){
-
-        read(fd, &temp, sizeof(temp));
+    message = mesaj.payload;
+    words = parseCommand(message);
         
-        switch(temp){
-            case 1:
-                std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea login!" << std::endl;
-                client_states[fd]->state = STATE_AWAITING_CREDENTIALS;
-                break;
-            case 2:
-                std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea logout!" << std::endl;
-                break;
-            case 3:
-                std::cout << "[Server]: Clientul " << fd-3 << " vrea sa vada cele mai noi carti!" << std::endl;
-                break;
-            case 4:
-                std::cout << "[Server]: Clientul " << fd-3 << " a dat exit!" << std::endl;
-                FD_CLR(fd, &master_set);
-                temp = 0;
-                break;
-            case 5:
-                std::cout << "[Server]: Clientul " << fd-3 << " m-a omorat!" << std::endl;
-                exit(0);
-                break;
-        }
+    switch(mesaj.command_id){
+        case CMD_LOGIN:
+            std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea login!" << std::endl;
+            //cod pentru verificare user
+            raspuns.status_code = CMD_DUMMY;
+            strcpy(raspuns.message, "dummy");
+            break;
+        case CMD_LOGOUT:
+            std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea logout!" << std::endl;
+            raspuns.status_code = CMD_DUMMY;
+            strcpy(raspuns.message, "dummy");
+            break;
+        case CMD_VIEW:
+            std::cout << "[Server]: Clientul " << fd-3 << " vrea sa vada cele mai noi carti!" << std::endl;
+            raspuns.status_code = CMD_DUMMY;
+            strcpy(raspuns.message, "dummy");
+            break;
+        case CMD_EXIT:
+            std::cout << "[Server]: Clientul " << fd-3 << " a dat exit!" << std::endl;
+            raspuns.status_code = CMD_EXIT;
+            strcpy(raspuns.message, "Ai fost deconectat cu succes!");
+            break;
+        case 5:
+            std::cout << "[Server]: Clientul " << fd-3 << " m-a omorat!" << std::endl;
+            raspuns.status_code = CMD_DUMMY;
+            strcpy(raspuns.message, "dummy");
+            exit(0);
+            break;
+
+        default:
+        break;
     }
-
-    else if(client_states[fd]->state == STATE_AWAITING_CREDENTIALS){
-        static char* p = NULL;
-        static int bytesread = read(fd, &buffer, BUFFER_SIZE);
-        buffer[bytesread] = '\0'; 
-        p = strtok(buffer, " ");
-        username = p;
-        p = strtok(NULL, " ");
-        password = p;
-
-        if(usersDB.checkLogin(username, password) == true){
-
-        }
-        else{
-            
-        }
-
-
-
-    }  
     return 0;
 }
 
@@ -105,11 +107,14 @@ int Server::processCommand(int fd){
 
 
 int Server::run(){
-    int temp_addrlen = 0;
-    int new_client_fd = 0;
+    static int temp_addrlen = 0;
+    static int new_client_fd = 0;
+    FD_ZERO(&master_set);
+    FD_SET(server_fd, &master_set);
+    max_fd=server_fd;
     while (true) {
         read_set = master_set;
-        
+
         select(max_fd + 1, &read_set, NULL, NULL, NULL);
 
         if (FD_ISSET(server_fd, &read_set)) {
@@ -120,13 +125,23 @@ int Server::run(){
                 max_fd = new_client_fd;
             }
             std::cout << "New connection" << std::endl;
-            client_states[new_client_fd] = new ClientInfo();
 
             FD_SET(new_client_fd, &master_set);
         }
-        for (int i = 0; i < MAX_CLIENTS; i++) {
+        for (int i = 4; i < MAX_CLIENTS; i++) {
             if (FD_ISSET(i, &read_set)) {
-                processCommand(i);
+
+                int bytes_recieved = recv(i, &mesaj, sizeof(mesaj), 0);
+
+                if(bytes_recieved == 0){
+                    close(i);
+                    FD_CLR(i, &master_set);
+                }
+
+                if(bytes_recieved == sizeof(mesaj)){
+                    processCommand(i);
+                    send(i, &raspuns, sizeof(raspuns), 0);
+                }
             }
         }
     }

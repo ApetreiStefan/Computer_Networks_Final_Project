@@ -1,3 +1,4 @@
+#pragma once
 #include "Libraries.hpp"
 
 class DatabaseManager {
@@ -81,16 +82,3 @@ class DatabaseManager {
         }
     };
 
-    enum ClientState {
-        STATE_IDLE,                 // Așteaptă o comandă nouă (LOGIN, REGISTER, etc.)
-        STATE_AWAITING_CREDENTIALS, // Așteaptă username și parolă după comanda LOGIN
-        STATE_AWAITING_CHAT_DATA,   // Așteaptă un mesaj de chat
-        STATE_LOGGED_IN             // Clientul este autentificat
-    };
-    
-    // Structura care reține informațiile pentru fiecare client
-    struct ClientInfo {
-        ClientState state = STATE_IDLE;
-        std::string username;
-        // Poți adăuga un buffer pentru date incomplete
-    };

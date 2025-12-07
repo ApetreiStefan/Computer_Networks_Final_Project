@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <iostream>
@@ -9,4 +10,7 @@
 #include <thread>
 #include <string>
 #include <map>
+#include <vector>
+#include <sstream>
 
+std::vector<std::string> parseCommand(const std::string& input);

@@ -10,3 +10,8 @@
 #include <string>
 #include <map>
 #include <sqlite3.h>
+#include <vector>
+#include <sstream>
+
+std::vector<std::string> parseCommand(const std::string& input);
+

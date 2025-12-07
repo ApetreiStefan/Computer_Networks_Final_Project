@@ -2,7 +2,6 @@
 #include "Client.hpp"
 
 Client::Client(){
-    this->initializeMap();
 
     client_socket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -33,6 +32,10 @@ Client* Client::GetInstance(){
 int Client::getCommand(){
     std::cout << "-> " << std::flush;
     std::getline(std::cin, message);
+    words = parseCommand(message);
+    
+    mesaj.command_id = checkCommand(words);
+    strcpy(mesaj.payload,message.c_str());
 
     return 0;
 }
@@ -40,22 +43,24 @@ int Client::getCommand(){
 
 
 
+std::vector<std::string> parseCommand(const std::string& input){
+    std::vector<std::string> words;
+    std::stringstream ss(input);
+    std::string word;
 
-void Client::initializeMap(){
-    commands["login"] = 1;
-    commands["logout"] = 2;
-    commands["view"] = 3;
-    commands["exit"] = 4;
-    commands["kill"] = 5;
-    commands["register"] = 6;
+    while (ss >> word) {
+        words.push_back(word);
+    }
+    return words;
 }
 
 
 
 
-int Client::checkCommand(){
+int Client::checkCommand(std::vector<std::string> w){
+
     for(auto i : commands){
-        if(i.first == message){
+        if(i.first == w[0]){
             return i.second;
         }
     }
@@ -65,11 +70,21 @@ int Client::checkCommand(){
 
 
 
-int Client::sendCommand(int id){
-    if(send(client_socket, &id, sizeof(id), 0) == 0){
-        std::cout << "Ceva s-a intamplat cu serverul... OVER!" << std::endl;
-    }
 
+int Client::runCommand(){
+    std::cout << raspuns.message << std::endl;
+    switch(raspuns.status_code){
+        case -1:
+        std::cout << "Comanda invalida!" << std::endl;
+        break;
+
+        case 4:
+        close(client_socket);
+        exit(0);
+
+        default:
+        break;
+    }
     return 0;
 }
 
@@ -77,21 +92,15 @@ int Client::sendCommand(int id){
 
 
 
+
 int Client::run(){
-    int temp;
     while (true) {
 
         getCommand();
-        temp = checkCommand();
-        if(temp < 0){
-            std::cout << "Comanda invalida!" << std::endl;
-        }
-        else if(temp == 4){
-            std::cout << "Ai fost deconectat cu succes!" << std::endl;
-            close(client_socket);
-            exit(0);
-        }
-        else sendCommand(temp);
+        send(client_socket, &mesaj, sizeof(mesaj), 0);
+        recv(client_socket, &raspuns, sizeof(raspuns), 0);
+        runCommand();
+
     }
 
     close(client_socket);

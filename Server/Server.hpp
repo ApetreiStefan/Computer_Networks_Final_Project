@@ -2,6 +2,7 @@
 
 #include "Libraries.hpp"
 #include "DatabaseManager.hpp"
+#include "./../Common_Code/Protocol.hpp"
 
 
 #define PORT 8080
@@ -19,16 +20,19 @@ private:
     fd_set read_set;
     int max_fd = 0;
 
+
+    int checkCommand();
+    ClientMessage mesaj;
+    ServerResponse raspuns;
+    std::string message;
+    std::vector<std::string> words;
+
     DatabaseManager usersDB = DatabaseManager("./Databases/users.db");
     std::string username;
     std::string password;
     int callback_users(void* data, int argc, char** argv, char** colName);
-    std::map<int, ClientInfo*> client_states;
 
-    char buffer[BUFFER_SIZE];
-
-    int temp;
-    std::string message;
+    int command_id;
     int processCommand(int fd);
 
     Server();
@@ -39,6 +43,4 @@ public:
 
     int run();
     static Server* GetInstance();
-
-    ~Server();
 };
