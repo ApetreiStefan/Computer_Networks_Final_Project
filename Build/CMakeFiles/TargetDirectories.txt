@@ -1,0 +1,4 @@
+/home/stefan/Documents/Retele/Computer_Networks_Final_Project/Build/CMakeFiles/Client.dir
+/home/stefan/Documents/Retele/Computer_Networks_Final_Project/Build/CMakeFiles/Server.dir
+/home/stefan/Documents/Retele/Computer_Networks_Final_Project/Build/CMakeFiles/edit_cache.dir
+/home/stefan/Documents/Retele/Computer_Networks_Final_Project/Build/CMakeFiles/rebuild_cache.dir

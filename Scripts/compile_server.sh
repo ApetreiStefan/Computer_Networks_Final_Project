@@ -1,4 +1,4 @@
 
 
-g++ -Wall ./../Server/main.cpp ./../Server/Server.cpp -o ./../Binaries/server.bin -lsqlite3
+g++ -Wall ./../Server/main.cpp ./../Server/Server.cpp -o ./../Binaries/server.bin -lsqlite3s -static -L.
 
