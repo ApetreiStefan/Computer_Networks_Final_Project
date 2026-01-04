@@ -200,4 +200,11 @@ CMakeFiles/Server.dir/Server/Server.cpp.o: \
  /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/sstream \
  /usr/include/c++/13/bits/sstream.tcc /usr/include/sqlite3.h \
  /home/stefan/Documents/Retele/Computer_Networks_Final_Project/Server/DatabaseManager.hpp \
- /home/stefan/Documents/Retele/Computer_Networks_Final_Project/Server/./../Common_Code/Protocol.hpp
+ /home/stefan/Documents/Retele/Computer_Networks_Final_Project/Server/./../Common_Code/Protocol.hpp \
+ /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h \
+ /usr/include/c++/13/bits/stl_tempbuf.h \
+ /usr/include/c++/13/pstl/glue_algorithm_defs.h \
+ /usr/include/c++/13/pstl/execution_defs.h

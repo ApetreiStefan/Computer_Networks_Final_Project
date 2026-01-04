@@ -35,13 +35,26 @@ Server* Server::GetInstance(){
 
 
 
-std::vector<std::string> parseCommand(const std::string& input){
+#include <algorithm>
+#include <cctype>
+
+std::vector<std::string> parseCommand(const std::string& input) {
     std::vector<std::string> words;
     std::stringstream ss(input);
     std::string word;
 
     while (ss >> word) {
-        words.push_back(word);
+        word.erase(word.begin(), std::find_if(word.begin(), word.end(), [](unsigned char ch) {
+            return !std::isspace(ch) && std::isprint(ch);
+        }));
+        
+        word.erase(std::find_if(word.rbegin(), word.rend(), [](unsigned char ch) {
+            return !std::isspace(ch) && std::isprint(ch);
+        }).base(), word.end());
+
+        if (!word.empty()) {
+            words.push_back(word);
+        }
     }
     return words;
 }
@@ -67,18 +80,50 @@ int Server::processCommand(int fd){
     message = mesaj.payload;
     words = parseCommand(message);
         
+    int id_temp;
     switch(mesaj.command_id){
         case CMD_LOGIN:
             std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea login!" << std::endl;
-            //cod pentru verificare user
-            raspuns.status_code = CMD_DUMMY;
-            strcpy(raspuns.message, "dummy");
+
+            if(words.size() < 3) {
+                strcpy(raspuns.message, "Format comanda invalid!");
+                return -1;
+            }
+
+            if(mesaj.user_id !=0){ // clientul este deja logat
+                raspuns.user_id = active_sessions[fd];
+                raspuns.status_code = STATUS_LOGIN_FAILED;
+                strcpy(raspuns.message, "Esti deja logat!");
             break;
+            }
+            std::cout << " [" << words[1] << "] [" << words[2] << "]" << std::endl;
+            id_temp = DB.checkLogin(words[1], words[2]);
+            if(id_temp != 0){
+                raspuns.status_code = STATUS_LOGIN_SUCCESSFUL;
+                raspuns.user_id = id_temp;
+                active_sessions[fd] = id_temp;
+                strcpy(raspuns.message, "Ai fost logat cu succes!");
+            }
+            else{
+                raspuns.user_id = 0;
+                raspuns.status_code = STATUS_LOGIN_FAILED;
+                strcpy(raspuns.message, "Nu ai putut fi logat!");
+            }
+            break;
+
         case CMD_LOGOUT:
             std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea logout!" << std::endl;
-            raspuns.status_code = CMD_DUMMY;
-            strcpy(raspuns.message, "dummy");
+            if(active_sessions.find(fd) == active_sessions.end()){
+                strcpy(raspuns.message, "Nu esti logat!");
+            }
+            else{
+                strcpy(raspuns.message, "Ai fost deconectat cu succes!");
+            }
+            active_sessions.erase(fd);
+            raspuns.status_code = STATUS_LOGOUT;
+            raspuns.user_id = 0;            
             break;
+
         case CMD_VIEW:
             std::cout << "[Server]: Clientul " << fd-3 << " vrea sa vada cele mai noi carti!" << std::endl;
             raspuns.status_code = CMD_DUMMY;
@@ -89,7 +134,11 @@ int Server::processCommand(int fd){
             raspuns.status_code = CMD_EXIT;
             strcpy(raspuns.message, "Ai fost deconectat cu succes!");
             break;
-        case 5:
+        case CMD_REGISTER:
+            std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea register!" << std::endl;
+
+            break;
+        case CMD_KILL:
             std::cout << "[Server]: Clientul " << fd-3 << " m-a omorat!" << std::endl;
             raspuns.status_code = CMD_DUMMY;
             strcpy(raspuns.message, "dummy");
@@ -97,7 +146,7 @@ int Server::processCommand(int fd){
             break;
 
         default:
-        break;
+            break;
     }
     return 0;
 }
@@ -135,6 +184,7 @@ int Server::run(){
 
                 if(bytes_recieved == 0){
                     close(i);
+                    active_sessions.erase(i);
                     FD_CLR(i, &master_set);
                 }
 

@@ -27,9 +27,10 @@ private:
     std::string message;
     std::vector<std::string> words;
 
-    DatabaseManager usersDB = DatabaseManager("./Databases/users.db");
+    DatabaseManager DB = DatabaseManager("/home/stefan/Documents/Retele/Computer_Networks_Final_Project/Server/Databases/baze_de_date.db");
     std::string username;
     std::string password;
+    std::map<int, int> active_sessions;
     int callback_users(void* data, int argc, char** argv, char** colName);
 
     int command_id;

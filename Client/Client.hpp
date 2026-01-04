@@ -9,6 +9,8 @@
 
 class Client{
 private:
+    int user_id = 0;
+
     int client_socket = 0;
     sockaddr_in serv_addr;
     char write_buffer[BUFFER_SIZE] = {0};

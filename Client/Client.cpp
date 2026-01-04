@@ -30,6 +30,8 @@ Client* Client::GetInstance(){
 
 
 int Client::getCommand(){
+    mesaj.user_id = user_id;
+
     std::cout << "-> " << std::flush;
     std::getline(std::cin, message);
     words = parseCommand(message);
@@ -72,10 +74,23 @@ int Client::checkCommand(std::vector<std::string> w){
 
 
 int Client::runCommand(){
-    std::cout << raspuns.message << std::endl;
     switch(raspuns.status_code){
         case -1:
         std::cout << "Comanda invalida!" << std::endl;
+        break;
+
+        case STATUS_LOGIN_SUCCESSFUL:
+        std::cout<< "[Client]: " << raspuns.message << std::endl;
+        user_id = raspuns.user_id;
+        break;
+
+        case STATUS_LOGIN_FAILED:
+        std::cout<< "[Client]: " << raspuns.message << std::endl;
+        break;
+
+        case STATUS_LOGOUT:
+        user_id = 0;
+        std::cout<< "[Client]: " << raspuns.message << std::endl;
         break;
 
         case 4:
