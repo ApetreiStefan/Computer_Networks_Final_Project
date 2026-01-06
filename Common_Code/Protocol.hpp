@@ -6,14 +6,14 @@
 // Structura mesajului trimis de Client -> Server
 struct ClientMessage {
     int command_id;       // Ce vrea clientul să facă (din enum-ul de mai sus)
-    char payload[256];    // Datele (ex: titlul cărții, user, pass). Dimensiune fixă pt simplitate.
+    char payload[4096];    // Datele (ex: titlul cărții, user, pass). Dimensiune fixă pt simplitate.
     int user_id = 0;
 };
 
 // Structura răspunsului Server -> Client
 struct ServerResponse {
     int status_code;      // 200 = OK, 404 = Not Found, 500 = Error
-    char message[256];    // Mesaj text pentru utilizator
+    char message[4096];    // Mesaj text pentru utilizator
     int user_id = 0;
 };
 
@@ -40,5 +40,7 @@ static std::map<std::string,int> commands={
 enum StatusCodes{
     STATUS_LOGIN_SUCCESSFUL = 1,
     STATUS_LOGIN_FAILED,
-    STATUS_LOGOUT
+    STATUS_LOGOUT,
+    STATUS_REGISTER,
+    STATUS_EXIT
 };

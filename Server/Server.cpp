@@ -81,6 +81,7 @@ int Server::processCommand(int fd){
     words = parseCommand(message);
         
     int id_temp;
+    std::string string_temp;
     switch(mesaj.command_id){
         case CMD_LOGIN:
             std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea login!" << std::endl;
@@ -131,13 +132,22 @@ int Server::processCommand(int fd){
             break;
         case CMD_EXIT:
             std::cout << "[Server]: Clientul " << fd-3 << " a dat exit!" << std::endl;
-            raspuns.status_code = CMD_EXIT;
+            raspuns.status_code = STATUS_EXIT;
             strcpy(raspuns.message, "Ai fost deconectat cu succes!");
             break;
+            
         case CMD_REGISTER:
             std::cout << "[Server]: Clientul " << fd-3 << " vrea sa dea register!" << std::endl;
-
+            if(DB.registerUser(words[1], words[2]) == 1){
+                string_temp = "[Server]: Userul " + words[1] + " a fost inregistrat cu succes!";
+            }
+            else{
+                string_temp = "[Server]: A aparut o problema in inregistrarea userului " + words[1];
+            }
+            raspuns.status_code = STATUS_REGISTER;
+            strcpy(raspuns.message,string_temp.c_str());
             break;
+
         case CMD_KILL:
             std::cout << "[Server]: Clientul " << fd-3 << " m-a omorat!" << std::endl;
             raspuns.status_code = CMD_DUMMY;

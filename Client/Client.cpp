@@ -93,9 +93,14 @@ int Client::runCommand(){
         std::cout<< "[Client]: " << raspuns.message << std::endl;
         break;
 
-        case 4:
+        case STATUS_EXIT:
+        std::cout << "[Client]: " << raspuns.message << std::endl;
         close(client_socket);
         exit(0);
+
+        case STATUS_REGISTER:
+        std::cout << "[Client]: " << raspuns.message << std::endl;
+        break;
 
         default:
         break;
