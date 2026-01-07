@@ -11,6 +11,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
+#include <cctype>
 
 #include <sqlite3.h>
 

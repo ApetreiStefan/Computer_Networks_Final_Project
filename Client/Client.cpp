@@ -102,6 +102,14 @@ int Client::runCommand(){
         std::cout << "[Client]: " << raspuns.message << std::endl;
         break;
 
+        case STATUS_VIEW:
+        std::cout << "[Client]: " << raspuns.message << std::endl;
+        break;
+
+        case STATUS_SEARCH:
+        std::cout << "[Client]: " << raspuns.message << std::endl;
+        break;
+
         default:
         break;
     }

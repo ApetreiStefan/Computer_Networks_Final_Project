@@ -24,7 +24,8 @@ enum CommandType {
     CMD_EXIT,
     CMD_KILL,
     CMD_REGISTER,
-    CMD_DUMMY
+    CMD_DUMMY,
+    CMD_SEARCH
     
 };
 
@@ -34,7 +35,8 @@ static std::map<std::string,int> commands={
     {"view", CMD_VIEW},
     {"exit", CMD_EXIT},
     {"kill", CMD_KILL},
-    {"register", CMD_REGISTER}
+    {"register", CMD_REGISTER},
+    {"search", CMD_SEARCH}
 };
 
 enum StatusCodes{
@@ -42,5 +44,7 @@ enum StatusCodes{
     STATUS_LOGIN_FAILED,
     STATUS_LOGOUT,
     STATUS_REGISTER,
-    STATUS_EXIT
+    STATUS_EXIT,
+    STATUS_VIEW,
+    STATUS_SEARCH,
 };
