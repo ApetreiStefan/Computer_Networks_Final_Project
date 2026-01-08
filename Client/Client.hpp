@@ -18,6 +18,7 @@ private:
 
     std::string message;
     std::vector<std::string> words;
+    std::vector<std::string> own_words;
     ClientMessage mesaj;
     ServerResponse raspuns;
 

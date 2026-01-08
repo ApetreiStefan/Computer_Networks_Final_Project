@@ -74,6 +74,9 @@ int Client::checkCommand(std::vector<std::string> w){
 
 
 int Client::runCommand(){
+    words = parseCommand(raspuns.message);
+    own_words = parseCommand(mesaj.payload);
+
     switch(raspuns.status_code){
         case -1: {
         std::cout << "Comanda invalida!" << std::endl;
@@ -120,6 +123,43 @@ int Client::runCommand(){
 
         case STATUS_DELETE_HISTORY: {
             std::cout << "[Client]: " << raspuns.message << std::endl;
+        }
+
+        case STATUS_DOWNLOAD_FAILED: {
+            std::cout << "[Client]: " << raspuns.message << std::endl;
+        break;    
+        }
+
+        case STATUS_DOWNLOAD: {
+            std::cout << "[Client]: " << "Incepe downloadul!" << std::endl;
+
+            if(own_words.size() < 2){
+                std::cout << "[Client]: " << "Problema la words!" << std::endl;
+                break;
+            }
+
+            mesaj.command_id = CMD_DOWNLOAD_START;
+            send(client_socket, &mesaj, sizeof(mesaj), 0);
+
+            std::string fileName = "Downloads/descarcat_" + own_words[1];
+            FILE *file = fopen(fileName.c_str(), "wb");
+
+            char buffer[1024];
+            int bytesReceived;
+            while ((bytesReceived = recv(client_socket, buffer, sizeof(buffer), 0)) > 0) {
+                fwrite(buffer, 1, bytesReceived, file);
+                if (bytesReceived < sizeof(buffer)){
+                    std::cout << "[Client]: " << "Download finalizat!" << std::endl;
+                    break;
+                }  
+            }
+
+        break;
+        }
+
+        case STATUS_RECCOMEND: {
+            std::cout << "[Client]: " << raspuns.message << std::endl;
+        break;
         }
 
         default:

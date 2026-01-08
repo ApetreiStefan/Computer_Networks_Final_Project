@@ -79,7 +79,7 @@ int Server::checkCommand(){
 int Server::processCommand(int fd){
     message = mesaj.payload;
     words = parseCommand(message);
-        
+    
     int id_temp;
     int ok_temp;
     std::string string_temp;
@@ -190,14 +190,12 @@ int Server::processCommand(int fd){
             int s_year = 0;
             float s_rating = 0.0;
 
-            // Parsăm argumentele: search title=Dune_Mantuitorul author=Herbert
             for (size_t i = 1; i < words.size(); ++i) {
                 size_t pos = words[i].find('=');
                 if (pos != std::string::npos) {
                     std::string key = words[i].substr(0, pos);
                     std::string val = words[i].substr(pos + 1);
 
-                    // Înlocuim '_' cu ' ' pentru a permite căutarea numelor compuse
                     std::replace(val.begin(), val.end(), '_', ' ');
 
                     if (key == "title") s_title = val;
@@ -213,12 +211,9 @@ int Server::processCommand(int fd){
                 }
             }
 
-            // Executăm căutarea în DB
             DB.searchBooks(s_genre, s_author, s_title, s_year, s_rating, s_isbn, raspuns.message);
             
-            // Logăm căutarea doar dacă utilizatorul este logat
             if (active_sessions.find(fd) != active_sessions.end()) {
-                // Logăm întreg payload-ul pentru a analiza ulterior preferințele
                 DB.logSearch(active_sessions[fd], mesaj.payload);
             }
 
@@ -240,6 +235,70 @@ int Server::processCommand(int fd){
                 strcpy(raspuns.message, "Ceva nu a mers bine cu stergerea istoricului!");
             }
             break;
+        }
+
+        case CMD_DOWNLOAD: {
+            std::cout << "[Server]: Clientul " << fd-3 << " cu user id " << active_sessions[fd] << " vrea sa descarce o carte." << std::endl;
+
+            if (active_sessions[fd] == 0) {
+                raspuns.status_code = STATUS_DOWNLOAD_FAILED;
+                strcpy(raspuns.message, "Trebuie sa fi logat pentru a descarca carti!");
+                break;
+            }
+        
+            if (words.size() < 2) {
+                strcpy(raspuns.message, "Utilizare: download <titlu_carte>");
+                raspuns.status_code = STATUS_DOWNLOAD_FAILED;
+                break;
+            }
+
+            std::string val = words[1];
+                std::replace(val.begin(), val.end(), '_', ' ');
+
+            if(DB.bookExists(val)!=1){
+                strcpy(raspuns.message, "Carte inexistenta");
+                raspuns.status_code = STATUS_DOWNLOAD_FAILED;
+                break;
+            }
+        
+            std::string bookTarget = words[1];
+            std::replace(bookTarget.begin(), bookTarget.end(), '_', ' ');
+        
+            if (DB.logDownload(active_sessions[fd], bookTarget, filePath)) {
+                raspuns.status_code = STATUS_DOWNLOAD;
+ 
+                strcpy(raspuns.message, words[1].c_str());
+            } else {
+                raspuns.status_code = STATUS_DOWNLOAD_FAILED;
+                strcpy(raspuns.message, "Eroare: Cartea nu a fost gasita in baza de date.");
+            }
+            break;
+        }
+        
+        case CMD_DOWNLOAD_START: {
+            FILE *file = fopen(filePath, "rb");
+            char buffer[1024];
+            size_t bytesRead;
+            while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
+                if (send(fd, buffer, bytesRead, 0) == -1) {
+                    perror("Eroare la trimiterea fisierului");
+                    break;
+                }
+            }
+            std::cout << "[Server]: Download over!" << std::endl;
+            break;
+        }
+
+        case CMD_RECCOMEND: {
+            std::cout << "[Server]: Clientul " << fd-3 << " cu user id " << active_sessions[fd] <<  " doreste recomandari!" << std::endl;
+            raspuns.status_code = STATUS_RECCOMEND;
+
+            if (active_sessions[fd] == 0) {
+                strcpy(raspuns.message, "Trebuie sa fi logat pentru a vedea istoricul!");
+                break;
+            }
+            strcpy(raspuns.message, DB.getRecommendations(active_sessions[fd]).c_str());
+        break;
         }
 
         default:

@@ -27,11 +27,12 @@ private:
     std::string message;
     std::vector<std::string> words;
 
-    DatabaseManager DB = DatabaseManager("/home/stefan/Documents/Retele/Computer_Networks_Final_Project/Server/Databases/baze_de_date.db");
+    DatabaseManager DB = DatabaseManager("./Databases/baze_de_date.db");
     std::string username;
     std::string password;
     std::map<int, int> active_sessions;
     int callback_users(void* data, int argc, char** argv, char** colName);
+    char filePath[256];
 
     int command_id;
     int processCommand(int fd);

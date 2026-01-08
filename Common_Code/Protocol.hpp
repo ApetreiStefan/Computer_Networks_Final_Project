@@ -26,7 +26,10 @@ enum CommandType {
     CMD_REGISTER,
     CMD_DUMMY,
     CMD_SEARCH,
-    CMD_DELETE_HISTORY
+    CMD_DELETE_HISTORY,
+    CMD_DOWNLOAD,
+    CMD_DOWNLOAD_START,
+    CMD_RECCOMEND
     
 };
 
@@ -38,7 +41,10 @@ static std::map<std::string,int> commands={
     {"kill", CMD_KILL},
     {"register", CMD_REGISTER},
     {"search", CMD_SEARCH},
-    {"delete_history", CMD_DELETE_HISTORY}
+    {"delete_history", CMD_DELETE_HISTORY},
+    {"download", CMD_DOWNLOAD},
+    {"reccomend", CMD_RECCOMEND}
+
 };
 
 enum StatusCodes{
@@ -49,5 +55,8 @@ enum StatusCodes{
     STATUS_EXIT,
     STATUS_VIEW,
     STATUS_SEARCH,
-    STATUS_DELETE_HISTORY
+    STATUS_DELETE_HISTORY,
+    STATUS_DOWNLOAD,
+    STATUS_DOWNLOAD_FAILED,
+    STATUS_RECCOMEND
 };
