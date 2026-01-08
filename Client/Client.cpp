@@ -75,40 +75,52 @@ int Client::checkCommand(std::vector<std::string> w){
 
 int Client::runCommand(){
     switch(raspuns.status_code){
-        case -1:
+        case -1: {
         std::cout << "Comanda invalida!" << std::endl;
         break;
+        }
 
-        case STATUS_LOGIN_SUCCESSFUL:
+        case STATUS_LOGIN_SUCCESSFUL: {
         std::cout<< "[Client]: " << raspuns.message << std::endl;
         user_id = raspuns.user_id;
         break;
+        }
 
-        case STATUS_LOGIN_FAILED:
+        case STATUS_LOGIN_FAILED: {
         std::cout<< "[Client]: " << raspuns.message << std::endl;
         break;
+        }
 
-        case STATUS_LOGOUT:
+        case STATUS_LOGOUT: {
         user_id = 0;
         std::cout<< "[Client]: " << raspuns.message << std::endl;
         break;
+        }
 
-        case STATUS_EXIT:
+        case STATUS_EXIT: {
         std::cout << "[Client]: " << raspuns.message << std::endl;
         close(client_socket);
         exit(0);
+        }
 
-        case STATUS_REGISTER:
+        case STATUS_REGISTER: {
         std::cout << "[Client]: " << raspuns.message << std::endl;
         break;
+        }
 
-        case STATUS_VIEW:
+        case STATUS_VIEW: {
         std::cout << "[Client]: " << raspuns.message << std::endl;
         break;
+        }
 
-        case STATUS_SEARCH:
-        std::cout << "[Client]: " << raspuns.message << std::endl;
-        break;
+        case STATUS_SEARCH:{
+            std::cout << "[Client]: " << raspuns.message << std::endl;
+            break;
+        }
+
+        case STATUS_DELETE_HISTORY: {
+            std::cout << "[Client]: " << raspuns.message << std::endl;
+        }
 
         default:
         break;

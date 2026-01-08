@@ -226,6 +226,22 @@ int Server::processCommand(int fd){
             break;
         }
             
+        case CMD_DELETE_HISTORY: {
+            std::cout << "[Server]: Clientul " << fd-3 << " cu user id " << active_sessions[fd] <<  " doreste sa isi stearga istoricul!" << std::endl;
+            raspuns.status_code = STATUS_DELETE_HISTORY;
+            if(active_sessions[fd] == 0){
+                strcpy(raspuns.message, "Trebuie sa fi logat pentru a putea sterge un istoric!");
+                break;
+            }
+            if(DB.deleteSearch(active_sessions[fd]) == 0){
+                strcpy(raspuns.message, "Istoricul a fost sters cu succes!");
+            }
+            else{
+                strcpy(raspuns.message, "Ceva nu a mers bine cu stergerea istoricului!");
+            }
+            break;
+        }
+
         default:
             break;
     }

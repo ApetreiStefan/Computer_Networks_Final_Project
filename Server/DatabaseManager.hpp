@@ -83,7 +83,7 @@ public:
     
     void viewBooks(int n, char* message) {
     sqlite3_stmt* stmt;
-    // Selectăm titlul și autorul primelor n cărți
+
     const char* sql = "SELECT title, (SELECT name FROM Authors WHERE id = author_id) FROM Books LIMIT ?;";
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -175,29 +175,44 @@ public:
 
     void logSearch(int userId, const std::string& query) {
         sqlite3_stmt* stmt;
-        // Query-ul de inserare. Coloana timestamp se completează singură în DB (DEFAULT CURRENT_TIMESTAMP)
+
         const char* sql = "INSERT INTO SearchHistory (user_id, query) VALUES (?, ?);";
 
-        // 1. Pregătirea statement-ului
         if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
             std::cerr << "[DB Error] logSearch Prepare: " << sqlite3_errmsg(db) << std::endl;
             return;
         }
 
-        // 2. Legăm parametrii (Bind)
-        // Primul '?' este user_id (integer)
         sqlite3_bind_int(stmt, 1, userId);
-        // Al doilea '?' este query-ul (text)
         sqlite3_bind_text(stmt, 2, query.c_str(), -1, SQLITE_STATIC);
 
-        // 3. Executăm inserarea
         if (sqlite3_step(stmt) != SQLITE_DONE) {
             std::cerr << "[DB Error] logSearch Step: " << sqlite3_errmsg(db) << std::endl;
         }
 
-        // 4. Eliberăm resursele
         sqlite3_finalize(stmt);
     }
 
+    int deleteSearch(int userID){
+        sqlite3_stmt* stmt;
+
+        const char* sql = "DELETE FROM SearchHistory WHERE user_id = ?";
+
+        if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+            std::cerr << "[DB Error] deleteSearch Prepare: " << sqlite3_errmsg(db) << std::endl;
+            return -1;
+        }
+        
+        sqlite3_bind_int(stmt, 1, userID);
+
+        if (sqlite3_step(stmt) != SQLITE_DONE) {
+            std::cerr << "[DB Error] deleteSearch Step: " << sqlite3_errmsg(db) << std::endl;
+            return -1;
+        }
+        
+
+        sqlite3_finalize(stmt);
+        return 0;
+    }
 };
 
